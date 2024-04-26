@@ -109,24 +109,10 @@ sh "${INSTALLER_FILE}" "${BUILD_DIR}"
 # Set procfile
 puts_step "Configuring Dynatrace Oneagent..."
 
-# determine default values for connection parameters
-DT_MANIFEST="$BUILD_DIR/dynatrace/oneagent/manifest.json"
-
-MANIFEST_TENANT=$(python -c 'import json,sys; print(json.load(sys.stdin)["tenantUUID"])' <$DT_MANIFEST)
-MANIFEST_TOKEN=$(python -c 'import json,sys; print(json.load(sys.stdin)["tenantToken"])' <$DT_MANIFEST)
-MANIFEST_ENDPOINTS=$(python -c 'import sys, json; print(";".join(json.load(sys.stdin)["communicationEndpoints"]))' <$DT_MANIFEST)
-
-VERSION=$(python -c 'import json,sys; print(json.load(sys.stdin)["version"])' <$DT_MANIFEST)
-
-# support pipelined deployments by overriding default values
-set_env "DT_TENANT" "\${DT_TENANT:-$MANIFEST_TENANT}"
-set_env "DT_TENANTTOKEN" "\${DT_TENANTTOKEN:-$MANIFEST_TOKEN}"
-set_env "DT_CONNECTION_POINT" "\${DT_CONNECTION_POINT:-$MANIFEST_ENDPOINTS}"
-
 # preload process agent for injection (/etc/ld.so.preload is on read-only filesystem)
 set_env "LD_PRELOAD" "/app/dynatrace/oneagent/agent/lib64/liboneagentproc.so"
 
 # ignore dynamic ports for service generation
 set_env "DT_IGNOREDYNAMICPORT" "\${DT_IGNOREDYNAMICPORT:-true}"
 
-puts_step "Dynatrace OneAgent ${VERSION} installed successfully"
+puts_step "Dynatrace OneAgent installed successfully"
